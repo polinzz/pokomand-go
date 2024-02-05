@@ -5,12 +5,17 @@ services:
     image: mysql:8.0
     restart: always
     ports:
-      - "5657:5657"
+      - "3306:3306"
     volumes:
       - ./migrations:/docker-entrypoint-initdb.d
     environment:
       MYSQL_ROOT_PASSWORD: 'password'
       MYSQL_DATABASE: 'gobase'
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "database", "-u", "root", "-ppassword" ]
+    networks:
+      - mynetwork
+
 
   pokomand-go:
     build:
@@ -22,3 +27,10 @@ services:
       MARIADB_DATABASE: 'gobase'
     ports:
       - "5686:5686"
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - mynetwork
+networks:
+  mynetwork:

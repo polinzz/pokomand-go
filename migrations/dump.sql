@@ -24,7 +24,7 @@ CREATE TABLE `Users`(
                         `username` TEXT NOT NULL,
                         `password` TEXT NOT NULL,
                         `hubs_id` INT NULL,
-                        `restaurant_id` INT NULL,
+                        `restaurants_id` INT NULL,
                         `role` ENUM('hub','restaurant','costumers') NOT NULL DEFAULT 'hub'
 );
 CREATE TABLE `User_Hubs`(

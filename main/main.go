@@ -1,40 +1,22 @@
 package main
 
 import (
-	"database/sql"
-	"github.com/go-sql-driver/mysql"
+	"github.com/go-chi/chi/v5"
 	"net/http"
-	"time"
+	"pokomand-go/Entity"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
-	time.Sleep(10 * time.Second)
-	conf := mysql.Config{
-		User:                 "root",
-		Passwd:               "password",
-		Net:                  "tcp",
-		Addr:                 "database:5657",
-		DBName:               "gobase",
-		AllowNativePasswords: true,
-	}
+	router := chi.NewRouter()
 
-	db, err := sql.Open("mysql", conf.FormatDSN())
-	if err != nil {
-		http.HandleFunc("/erreur1", func(writer http.ResponseWriter, request *http.Request) {
-			writer.Write([]byte("Erreur 1 !"))
-		})
-	}
+	router.Post("/user", Entity.GetUsers())
+	router.Put("/user/add", Entity.AddUser())
+	router.Get("/user/{id}", Entity.ShowUser())
+	router.Post("/hub", Entity.GetHubs())
 
-	defer db.Close()
+	// http.HandleFunc("/", Entity.GetUsers())
 
-	if err := db.Ping(); err != nil {
-		http.HandleFunc("/erreur2", func(writer http.ResponseWriter, request *http.Request) {
-			writer.Write([]byte("Erreur 2 !"))
-		})
-	}
-	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		writer.Write([]byte("Hello world !"))
-	})
-
-	http.ListenAndServe(":5686", nil)
+	http.ListenAndServe(":5686", router)
 }
