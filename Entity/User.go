@@ -2,6 +2,7 @@ package Entity
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/go-chi/chi/v5"
 	"log"
 	"net/http"
@@ -20,7 +21,7 @@ type User struct {
 	Role         string `json:"role"`
 }
 
-func GetUsers() http.HandlerFunc {
+func GetAllUsers() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		// call at the db
 		db := Middleware.OpenDB()
@@ -82,7 +83,7 @@ func AddUser() http.HandlerFunc {
 	}
 }
 
-func ShowUser() http.HandlerFunc {
+func GetUserById() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		// Open db
 		db := Middleware.OpenDB()
@@ -117,8 +118,21 @@ func ShowUser() http.HandlerFunc {
 	}
 }
 
+func GetUserByUsername(username string) User {
+	// Open db
+	fmt.Println(username)
+	db := Middleware.OpenDB()
+	user := User{}
+	err := db.QueryRow("SELECT first_name,last_name,username,password FROM Users WHERE username = ?", username).Scan(&user.LastName, &user.FirstName, &user.Username, &user.Password)
+	if err != nil {
+		log.Fatal(user)
+	}
+
+	return user
+}
+
 type UserInterface interface {
-	GetUsers() ([]User, error)
+	GetAllUsers() ([]User, error)
 	AddUser() ([]User, error)
 	ShowUser() ([]User, error)
 }
