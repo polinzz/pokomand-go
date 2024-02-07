@@ -13,8 +13,8 @@ func main() {
 	router := chi.NewRouter()
 
 	router.Post("/user", Entity.GetAllUsers())
-	router.Put("/user/add", Entity.AddUser())
-	router.Get("/user/{id}", Entity.GetUserById())
+	router.Put("/user/add", Store.SignUp())
+	// router.Get("/user/{id}", Entity.GetUserById())
 	router.Post("/login", Store.Login())
 	router.Post("/hub", Entity.GetHubs())
 

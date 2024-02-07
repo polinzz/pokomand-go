@@ -3,11 +3,9 @@ package Entity
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-chi/chi/v5"
 	"log"
 	"net/http"
 	"pokomand-go/Middleware"
-	"strconv"
 )
 
 type User struct {
@@ -22,6 +20,7 @@ type User struct {
 }
 
 func GetAllUsers() http.HandlerFunc {
+	// http à retirer et à mettre dans l'appelle dans Store
 	return func(writer http.ResponseWriter, request *http.Request) {
 		// call at the db
 		db := Middleware.OpenDB()
@@ -51,71 +50,33 @@ func GetAllUsers() http.HandlerFunc {
 	}
 }
 
-func AddUser() http.HandlerFunc {
-	return func(writer http.ResponseWriter, request *http.Request) {
-		item := User{}
-		// add json data
-		err := json.NewDecoder(request.Body).Decode(&item)
-		if err != nil {
-			log.Println("Erreur lors de la lecture du corps de la requête:", err)
-			http.Error(writer, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		// open db
-		db := Middleware.OpenDB()
+func AddUser(item User) int64 {
+	// open db
+	db := Middleware.OpenDB()
 
-		// call in db
-		_, errdb := db.Exec("INSERT INTO Users (last_name,first_name,username,password) VALUES (?,?,?,?)", item.LastName, item.FirstName, item.Username, item.Password)
+	hashPassword := Middleware.HashPassword(item.Password)
+	// call in db
+	result, errdb := db.Exec("INSERT INTO Users (last_name,first_name,username,password) VALUES (?,?,?,?)", item.LastName, item.FirstName, item.Username, hashPassword)
 
-		if errdb != nil {
-			log.Fatal("err3 ", errdb)
-		}
-
-		// json response
-		writer.Header().Set("Content-Type", "application/json")
-		err = json.NewEncoder(writer).Encode(struct {
-			Status  string `json:"status"`
-			Message string `json:"message"`
-		}{
-			Status:  "success",
-			Message: "Great Success",
-		})
+	if errdb != nil {
+		log.Fatal("err3 ", errdb)
 	}
+
+	lastUser, _ := result.LastInsertId()
+	// json response
+	return lastUser
 }
 
-func GetUserById() http.HandlerFunc {
-	return func(writer http.ResponseWriter, request *http.Request) {
-		// Open db
-		db := Middleware.OpenDB()
-
-		// select the id in /user/{id}
-		queryId := chi.URLParam(request, "id")
-		// convert string id in int
-		id, err := strconv.Atoi(queryId)
-		if err != nil {
-			log.Fatal("err3", err)
-			return
-		}
-		// call in db
-		rows, _ := db.Query("SELECT * FROM Users WHERE id = ?", id)
-		defer rows.Close()
-		users := []User{}
-
-		// select all the rows for user_id
-		for rows.Next() {
-			user := User{}
-			_ = rows.Scan(&user.ID, &user.LastName, &user.FirstName, &user.Username, &user.Password, &user.HubId, &user.RestaurantId, &user.Role)
-			users = append(users, user)
-		}
-
-		writer.Header().Set("Content-Type", "application/json")
-		errUser := json.NewEncoder(writer).Encode(users)
-		if errUser != nil {
-			log.Fatal(errUser)
-			return
-		}
-		return
+func GetUserById(id int64) User {
+	// Open db
+	db := Middleware.OpenDB()
+	user := User{}
+	// call in db
+	err := db.QueryRow("SELECT last_name,first_name,username,role FROM Users WHERE id = ?", id).Scan(&user.LastName, &user.FirstName, &user.Username, &user.Role)
+	if err != nil {
+		log.Fatal(err)
 	}
+	return user
 }
 
 func GetUserByUsername(username string) User {

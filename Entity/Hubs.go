@@ -15,6 +15,8 @@ type Hub struct {
 }
 
 func GetHubs() http.HandlerFunc {
+	// http à retirer et à mettre dans l'appelle dans Store prendre exemple sur User
+
 	return func(writer http.ResponseWriter, request *http.Request) {
 		db := Middleware.OpenDB()
 		writer.Header().Set("Content-Type", "application/json")

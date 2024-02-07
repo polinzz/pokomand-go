@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"pokomand-go/Entity"
+	"pokomand-go/Middleware"
+	"strings"
 )
 
 func Login() http.HandlerFunc {
@@ -16,16 +18,15 @@ func Login() http.HandlerFunc {
 			log.Fatal(err)
 		}
 		user := Entity.GetUserByUsername(queryUsers.Username)
-
-		if user.Password == queryUsers.Password {
-			var store = sessions.NewCookieStore([]byte("your-secret-key"))
+		if strings.Compare(user.Password, Middleware.HashPassword(queryUsers.Password)) == 0 {
+			store := sessions.NewCookieStore([]byte("your-secret-key"))
 			session, _ := store.Get(request, "session-name")
 
 			// Stockez une valeur dans la session
 			session.Values["variable_key"] = "valeur"
 			session.Save(request, writer)
 
-			err = json.NewEncoder(writer).Encode(struct {
+			json.NewEncoder(writer).Encode(struct {
 				Status  string `json:"status"`
 				Message string `json:"message"`
 			}{
@@ -33,7 +34,7 @@ func Login() http.HandlerFunc {
 				Message: "Great Success",
 			})
 		} else {
-			err = json.NewEncoder(writer).Encode(struct {
+			json.NewEncoder(writer).Encode(struct {
 				Status  string `json:"status"`
 				Message string `json:"message"`
 			}{
@@ -41,5 +42,32 @@ func Login() http.HandlerFunc {
 				Message: "error",
 			})
 		}
+	}
+}
+
+func SignUp() http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		item := Entity.User{}
+		err := json.NewDecoder(request.Body).Decode(&item)
+		if err != nil {
+			log.Fatal(err)
+		}
+		lastId := Entity.AddUser(item)
+		store := sessions.NewCookieStore([]byte("your-secret-key"))
+		session, _ := store.Get(request, "session-name")
+
+		// Stockez une valeur dans la session
+		session.Values["variable_key"] = "valeur"
+		session.Save(request, writer)
+
+		user := Entity.GetUserById(lastId)
+
+		json.NewEncoder(writer).Encode(struct {
+			Status  string      `json:"status"`
+			Message Entity.User `json:"message"`
+		}{
+			Status:  "success",
+			Message: user,
+		})
 	}
 }
