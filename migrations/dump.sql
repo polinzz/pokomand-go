@@ -2,7 +2,7 @@ CREATE TABLE `Restaurants`(
                               `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
                               `name` TEXT NOT NULL,
                               `product` JSON NOT NULL,
-                              `orders_id` JSON NOT NULL,
+                              `orders_id` JSON NOT NULL
 );
 CREATE TABLE `User_Restaurants`(
                                    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
