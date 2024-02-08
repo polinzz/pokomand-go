@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/go-chi/chi/v5"
 	"net/http"
 	"pokomand-go/Entity"
 	Store "pokomand-go/store"
+
+	"github.com/go-chi/chi/v5"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -12,11 +13,12 @@ import (
 func main() {
 	router := chi.NewRouter()
 
-	router.Post("/user", Entity.GetAllUsers())
+	router.Get("/user", Entity.GetAllUsers())
 	router.Put("/user/add", Store.SignUp())
 	// router.Get("/user/{id}", Entity.GetUserById())
 	router.Post("/login", Store.Login())
-	router.Post("/hub", Entity.GetHubs())
+	router.Get("/hub", Entity.GetAllHubs())
+	// router.Post("/hub/add", Entity.AddHub())
 
 	// http.HandleFunc("/", Entity.GetUsers())
 

@@ -11,10 +11,10 @@ type Hub struct {
 	ID           int    `json:"id"`
 	Name         string `json:"name"`
 	RestaurantId string `json:"restaurant_id"`
-	HubId        string `json:"hub_id"`
+	UserId       string `json:"user_id"`
 }
 
-func GetHubs() http.HandlerFunc {
+func GetAllHubs() http.HandlerFunc {
 	// http à retirer et à mettre dans l'appelle dans Store prendre exemple sur User
 
 	return func(writer http.ResponseWriter, request *http.Request) {
@@ -25,7 +25,7 @@ func GetHubs() http.HandlerFunc {
 		hubs := []Hub{}
 		for rows.Next() {
 			hub := Hub{}
-			_ = rows.Scan(&hub.ID, &hub.Name, &hub.RestaurantId, &hub.HubId)
+			_ = rows.Scan(&hub.ID, &hub.Name, &hub.RestaurantId, &hub.UserId)
 			hubs = append(hubs, hub)
 		}
 
@@ -38,7 +38,23 @@ func GetHubs() http.HandlerFunc {
 	}
 }
 
+// func AddHub() http.HandlerFunc {
+// 	// open db
+// 	db := Middleware.OpenDB()
+
+// 	// call in db
+// 	result, errdb := db.Exec("INSERT INTO Hubs (name,restaurant_id,uder_id) VALUES (?,?,?)", item.Name, item.RestaurantId, item.UserId)
+
+// 	if errdb != nil {
+// 		log.Fatal("err3 ", errdb)
+// 	}
+
+// 	lastHub, _ := result.LastInsertId()
+// 	// json response
+// 	return lastHub
+// }
+
 type HubsInterface interface {
-	GetHubs() ([]Hub, error)
+	GetAllHubs() ([]Hub, error)
 	AddHub() ([]Hub, error)
 }
