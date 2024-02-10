@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 	"pokomand-go/Entity"
-	Store "pokomand-go/store"
+	"pokomand-go/store"
 
 	"github.com/go-chi/chi/v5"
 
@@ -13,7 +13,7 @@ import (
 func main() {
 	router := chi.NewRouter()
 
-	// ENDPOINTS 
+	// ENDPOINTS
 
 	// Users
 	router.Get("/user", Entity.GetAllUsers())
@@ -27,6 +27,13 @@ func main() {
 	router.Post("/restaurant/add", Entity.CreateRestaurantHandler)
 	router.Get("/restaurants", Entity.GetAllRestaurants)
 	router.Delete("/restaurant", Entity.DeleteRestaurantByID)
+
+	// Order
+	router.Patch("/order/finish/{id}", Store.FinishOrder())
+	router.Patch("/order/status/{id}", Store.StatusUpdate())
+	router.Get("/order/{id}", Store.ShowOrders())
+	router.Get("/order/{state}/{id}", Store.ShowStateOrders())
+	router.Put("/order/add", Store.CreateOrder())
 
 	http.ListenAndServe(":5686", router)
 }

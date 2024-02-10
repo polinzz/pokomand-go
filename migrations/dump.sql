@@ -10,14 +10,16 @@ CREATE TABLE `User_Restaurants`(
                                    `restaurant_id` INT UNSIGNED NOT NULL,
                                    `user_id` INT UNSIGNED NOT NULL
 );
-CREATE TABLE `Orders`(
-                         `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-                         `product` JSON NOT NULL,
-                         `restaurant_id` INT UNSIGNED NOT NULL,
-                         `price` DOUBLE(8, 2) NOT NULL,
-                         `status` TEXT NOT NULL,
-                         `is_finish` TINYINT(1) NOT NULL,
-                         `retrieve_code` BIGINT NOT NULL
+CREATE TABLE `Orders`
+(
+    `id`            INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `product`       JSON         NOT NULL,
+    `restaurant_id` INT UNSIGNED NOT NULL,
+    `price`         DOUBLE(8, 2) NOT NULL,
+    `status`        TEXT         NOT NULL,
+    `is_finish`     TINYINT(1)   NOT NULL,
+    `user_id`       INT          NOT NULL,
+    `retrieve_code` BIGINT       NOT NULL
 );
 CREATE TABLE `Users`(
                         `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,

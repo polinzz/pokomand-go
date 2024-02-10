@@ -19,11 +19,11 @@ func Login() http.HandlerFunc {
 		}
 		user := Entity.GetUserByUsername(queryUsers.Username)
 		if strings.Compare(user.Password, Middleware.HashPassword(queryUsers.Password)) == 0 {
-			store := sessions.NewCookieStore([]byte("your-secret-key"))
+			store := sessions.NewCookieStore([]byte("poko"))
 			session, _ := store.Get(request, "session-name")
 
 			// Stockez une valeur dans la session
-			session.Values["variable_key"] = "valeur"
+			session.Values["user"] = user.ID
 			session.Save(request, writer)
 
 			json.NewEncoder(writer).Encode(struct {
@@ -53,11 +53,11 @@ func SignUp() http.HandlerFunc {
 			log.Fatal(err)
 		}
 		lastId := Entity.AddUser(item)
-		store := sessions.NewCookieStore([]byte("your-secret-key"))
+		store := sessions.NewCookieStore([]byte("poko"))
 		session, _ := store.Get(request, "session-name")
 
 		// Stockez une valeur dans la session
-		session.Values["variable_key"] = "valeur"
+		session.Values["user_id"] = lastId
 		session.Save(request, writer)
 
 		user := Entity.GetUserById(lastId)
