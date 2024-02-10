@@ -19,8 +19,8 @@ func CreateHub() http.HandlerFunc {
 
 		err := json.NewDecoder(request.Body).Decode(&queryHub)
 		if err != nil {
-			log.Fatal(err)
 			log.Println("Erreur lors du décodage JSON:", err)
+			log.Fatal(err)
 		}
 
 		store := sessions.NewCookieStore([]byte("poko"))
@@ -86,11 +86,11 @@ func DeleteHub() http.HandlerFunc {
 		hub := Entity.DeleteHubByID(int64(id))
 
 		json.NewEncoder(writer).Encode(struct {
-			Status  string     `json:"status"`
-			Message Entity.Hub `json:"message"`
+			Status  string `json:"status"`
+			Message string `json:"message"`
 		}{
 			Status:  "success",
-			Message: hub,
+			Message: "Hub supprimé",
 		})
 	}
 }

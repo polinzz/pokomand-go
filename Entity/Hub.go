@@ -8,8 +8,8 @@ import (
 type Hub struct {
 	ID           int    `json:"id"`
 	Name         string `json:"name"`
-	RestaurantId string `json:"restaurant_id"`
-	UserId       string `json:"user_id"`
+	RestaurantId int    `json:"restaurant_id"`
+	UserId       int    `json:"user_id"`
 }
 
 func AddHub(item Hub, userId int64) int64 {

@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 	"pokomand-go/Entity"
-	Store "pokomand-go/Store"
+	"pokomand-go/store"
 
 	"github.com/go-chi/chi/v5"
 
