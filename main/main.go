@@ -29,11 +29,12 @@ func main() {
 	router.Delete("/restaurant", Entity.DeleteRestaurantByID)
 
 	// Order
-	router.Patch("/order/finish/{id}", Store.FinishOrder())
-	router.Patch("/order/status/{id}", Store.StatusUpdate())
-	router.Get("/order/{id}", Store.ShowOrders())
-	router.Get("/order/{state}/{id}", Store.ShowStateOrders())
-	router.Put("/order/add", Store.CreateOrder())
+	router.Post("/order/finish/{id}", Store.FinishOrder())
+	router.Post("/order/status/{id}", Store.StatusUpdate())
+	router.Get("/order/{restaurant_id}", Store.ShowOrders())
+	router.Get("/order/{state}/{restaurant_id}", Store.ShowStateOrders())
+	router.Get("/order/retrieve_code/{state}/{retrieve_code}", Store.ShowOrdersByRetrieveCoce())
+	router.Post("/order/add", Store.CreateOrder())
 
 	http.ListenAndServe(":5686", router)
 }

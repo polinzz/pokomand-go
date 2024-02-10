@@ -17,8 +17,7 @@ CREATE TABLE `Orders`
     `restaurant_id` INT UNSIGNED NOT NULL,
     `price`         DOUBLE(8, 2) NOT NULL,
     `status`        TEXT         NOT NULL,
-    `is_finish`     TINYINT(1)   NOT NULL,
-    `user_id`       INT          NOT NULL,
+    `is_finish`     TINYINT(1)   NOT NULL DEFAULT 0,
     `retrieve_code` BIGINT       NOT NULL
 );
 CREATE TABLE `Users`(
@@ -27,8 +26,8 @@ CREATE TABLE `Users`(
                         `last_name` TEXT NOT NULL,
                         `username` TEXT NOT NULL,
                         `password` TEXT NOT NULL,
-                        `hubs_id` INT NULL,
-                        `restaurants_id` INT NULL,
+                        `hub_id` INT NULL,
+                        `restaurant_id` INT NULL,
                         `role` ENUM('hub','restaurant','costumers') NOT NULL DEFAULT 'hub'
 );
 CREATE TABLE `User_Hubs`(

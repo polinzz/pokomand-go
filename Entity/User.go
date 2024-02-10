@@ -56,7 +56,7 @@ func AddUser(item User) int64 {
 
 	hashPassword := Middleware.HashPassword(item.Password)
 	// call in db
-	result, errdb := db.Exec("INSERT INTO Users (last_name,first_name,username,password) VALUES (?,?,?,?)", item.LastName, item.FirstName, item.Username, hashPassword)
+	result, errdb := db.Exec("INSERT INTO Users (last_name,first_name,username,password,restaurant_id) VALUES (?,?,?,?,?)", item.LastName, item.FirstName, item.Username, hashPassword, item.RestaurantId)
 
 	if errdb != nil {
 		log.Fatal("err3 ", errdb)
@@ -72,7 +72,7 @@ func GetUserById(id int64) User {
 	db := Middleware.OpenDB()
 	user := User{}
 	// call in db
-	err := db.QueryRow("SELECT last_name,first_name,username,role FROM Users WHERE id = ?", id).Scan(&user.LastName, &user.FirstName, &user.Username, &user.Role)
+	err := db.QueryRow("SELECT last_name,first_name,username,role,restaurant_id FROM Users WHERE id = ?", id).Scan(&user.LastName, &user.FirstName, &user.Username, &user.Role, &user.RestaurantId)
 	if err != nil {
 		log.Fatal(err)
 	}
