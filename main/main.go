@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 	"pokomand-go/Entity"
-	"pokomand-go/store"
+	Store "pokomand-go/Store"
 
 	"github.com/go-chi/chi/v5"
 
@@ -21,7 +21,10 @@ func main() {
 	router.Post("/login", Store.Login())
 
 	// Hubs
-	router.Get("/hubs", Entity.GetAllHubs())
+	router.Post("/hub/add", Store.CreateHub())
+	router.Get("/hubs", Store.ShowHubs())
+	router.Get("/hub/{id}", Store.ShowOneHub())
+	router.Delete("/hub/{id}", Store.DeleteHub())
 
 	// Restaurants
 	router.Post("/restaurant/add", Entity.CreateRestaurantHandler)

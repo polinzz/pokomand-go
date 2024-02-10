@@ -1,9 +1,7 @@
 package Entity
 
 import (
-	"encoding/json"
 	"log"
-	"net/http"
 	"pokomand-go/Middleware"
 )
 
@@ -14,47 +12,76 @@ type Hub struct {
 	UserId       string `json:"user_id"`
 }
 
-func GetAllHubs() http.HandlerFunc {
-	// http à retirer et à mettre dans l'appelle dans Store prendre exemple sur User
+func AddHub(item Hub, userId int64) int64 {
+	log.Println("Début du traitement de la requête AddHub")
 
-	return func(writer http.ResponseWriter, request *http.Request) {
-		db := Middleware.OpenDB()
-		writer.Header().Set("Content-Type", "application/json")
-		rows, _ := db.Query("SELECT * FROM Hubs")
-		defer rows.Close()
-		hubs := []Hub{}
-		for rows.Next() {
-			hub := Hub{}
-			_ = rows.Scan(&hub.ID, &hub.Name, &hub.RestaurantId, &hub.UserId)
-			hubs = append(hubs, hub)
-		}
+	db := Middleware.OpenDB()
 
-		err := json.NewEncoder(writer).Encode(hubs)
-		if err != nil {
-			log.Fatal(err)
-			return
-		}
-		return
+	result, errdb := db.Exec(
+		"INSERT INTO Hubs (name,restaurant_id,user_id) VALUES (?,?,?)",
+		item.Name, item.RestaurantId, userId,
+	)
+	log.Println("result", result)
+
+	if errdb != nil {
+		log.Fatal(errdb)
 	}
+
+	lastHub, _ := result.LastInsertId()
+
+	log.Println("lastHub", lastHub)
+
+	return lastHub
 }
 
-// func AddHub() http.HandlerFunc {
-// 	// open db
-// 	db := Middleware.OpenDB()
+func GetHubById(id int64) Hub {
+	// Open db
+	db := Middleware.OpenDB()
+	hub := Hub{}
+	// call in db
+	err := db.QueryRow("SELECT * FROM Hubs WHERE id = ?", id).Scan(&hub.ID, &hub.Name, &hub.RestaurantId, &hub.UserId)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return hub
+}
 
-// 	// call in db
-// 	result, errdb := db.Exec("INSERT INTO Hubs (name,restaurant_id,uder_id) VALUES (?,?,?)", item.Name, item.RestaurantId, item.UserId)
+func GetAllHubs() []Hub {
+	log.Println("Début du traitement de la requête GetAllHubs")
 
-// 	if errdb != nil {
-// 		log.Fatal("err3 ", errdb)
-// 	}
+	// call at the db
+	db := Middleware.OpenDB()
 
-// 	lastHub, _ := result.LastInsertId()
-// 	// json response
-// 	return lastHub
+	// Use the table of the db
+	rows, _ := db.Query("SELECT * FROM Hubs")
+	defer rows.Close()
+
+	// initialize User type
+	hubs := []Hub{}
+
+	// add all the row in users
+	for rows.Next() {
+		hub := Hub{}
+		_ = rows.Scan(&hub.ID, &hub.Name, &hub.RestaurantId, &hub.UserId)
+		hubs = append(hubs, hub)
+	}
+
+	return hubs
+}
+
+func DeleteHubByID(id int64) Hub {
+	// Open db
+	db := Middleware.OpenDB()
+	hub := Hub{}
+	// call in db
+	err := db.QueryRow("DELETE FROM Hubs WHERE id = ?", id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return hub
+}
+
+// type HubsInterface interface {
+// 	GetAllHubs() ([]Hub, error)
+// 	AddHub() ([]Hub, error)
 // }
-
-type HubsInterface interface {
-	GetAllHubs() ([]Hub, error)
-	AddHub() ([]Hub, error)
-}

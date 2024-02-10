@@ -72,7 +72,7 @@ func GetUserById(id int64) User {
 	db := Middleware.OpenDB()
 	user := User{}
 	// call in db
-	err := db.QueryRow("SELECT last_name,first_name,username,role FROM Users WHERE id = ?", id).Scan(&user.LastName, &user.FirstName, &user.Username, &user.Role)
+	err := db.QueryRow("SELECT id,last_name,first_name,username,hub_id,restaurant_id,role FROM Users WHERE id = ?", id).Scan(&user.ID, &user.LastName, &user.FirstName, &user.Username, &user.RestaurantId, &user.HubId, &user.Role)
 	if err != nil {
 		log.Fatal(err)
 	}
