@@ -2,7 +2,6 @@ package Entity
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"pokomand-go/Middleware"
@@ -20,26 +19,20 @@ type User struct {
 }
 
 func GetAllUsers() http.HandlerFunc {
-	// http à retirer et à mettre dans l'appelle dans Store
 	return func(writer http.ResponseWriter, request *http.Request) {
-		// call at the db
 		db := Middleware.OpenDB()
 
-		// Use the table of the db
 		rows, _ := db.Query("SELECT * FROM Users")
 		defer rows.Close()
 
-		// initialize User type
 		users := []User{}
 
-		// add all the row in users
 		for rows.Next() {
 			user := User{}
 			_ = rows.Scan(&user.ID, &user.LastName, &user.FirstName, &user.Username, &user.Password, &user.HubId, &user.RestaurantId, &user.Role)
 			users = append(users, user)
 		}
 
-		// json response
 		writer.Header().Set("Content-Type", "application/json")
 		errUser := json.NewEncoder(writer).Encode(users)
 		if errUser != nil {
@@ -51,11 +44,9 @@ func GetAllUsers() http.HandlerFunc {
 }
 
 func AddUser(item User) int64 {
-	// open db
 	db := Middleware.OpenDB()
 
 	hashPassword := Middleware.HashPassword(item.Password)
-	// call in db
 	result, errdb := db.Exec("INSERT INTO Users (last_name,first_name,username,password,restaurant_id) VALUES (?,?,?,?,?)", item.LastName, item.FirstName, item.Username, hashPassword, item.RestaurantId)
 
 	if errdb != nil {
@@ -63,15 +54,12 @@ func AddUser(item User) int64 {
 	}
 
 	lastUser, _ := result.LastInsertId()
-	// json response
 	return lastUser
 }
 
 func GetUserById(id int64) User {
-	// Open db
 	db := Middleware.OpenDB()
 	user := User{}
-	// call in db
 	err := db.QueryRow("SELECT last_name,first_name,username,role,restaurant_id FROM Users WHERE id = ?", id).Scan(&user.LastName, &user.FirstName, &user.Username, &user.Role, &user.RestaurantId)
 	if err != nil {
 		log.Fatal(err)
@@ -80,8 +68,6 @@ func GetUserById(id int64) User {
 }
 
 func GetUserByUsername(username string) User {
-	// Open db
-	fmt.Println(username)
 	db := Middleware.OpenDB()
 	user := User{}
 	err := db.QueryRow("SELECT first_name,last_name,username,password FROM Users WHERE username = ?", username).Scan(&user.LastName, &user.FirstName, &user.Username, &user.Password)

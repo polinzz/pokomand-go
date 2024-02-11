@@ -25,8 +25,6 @@ type Drink struct {
 }
 
 func AddRestaurant(item Restaurant) int64 {
-	log.Println("Début du traitement de la requête AddRestaurant")
-
 	db := Middleware.OpenDB()
 
 	foods, err := json.Marshal(&item.Foods)
@@ -39,15 +37,12 @@ func AddRestaurant(item Restaurant) int64 {
 		"INSERT INTO Restaurants (name, hub_id, foods, drinks) VALUES (?, ?, ?, ?)",
 		item.Name, item.HubId, foods, drinks,
 	)
-	log.Println("result", result)
 
 	if errdb != nil {
 		log.Fatal(errdb)
 	}
 
 	lastRestaurant, _ := result.LastInsertId()
-
-	log.Println("lastRestaurant", lastRestaurant)
 
 	return lastRestaurant
 }
@@ -79,12 +74,9 @@ func GetRestaurantById(id int64) Restaurant {
 
 func GetAllRestaurantsByHubId(hubId int64) []Restaurant {
 	db := Middleware.OpenDB()
-	log.Println("hubId", hubId)
 
 	rows, _ := db.Query("SELECT * FROM Restaurants WHERE hub_id = ?", hubId)
 	defer rows.Close()
-
-	log.Println("rows", rows)
 
 	var foodsJSON string
 	var drinksJSON string
@@ -102,7 +94,6 @@ func GetAllRestaurantsByHubId(hubId int64) []Restaurant {
 			log.Fatal("errDrinks ", errDrinks)
 		}
 		restaurants = append(restaurants, restaurant)
-		log.Println("restaurants", restaurants)
 	}
 
 	return restaurants

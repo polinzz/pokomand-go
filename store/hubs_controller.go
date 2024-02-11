@@ -23,7 +23,6 @@ func CreateHub() http.HandlerFunc {
 		store := sessions.NewCookieStore([]byte("poko"))
 		session, _ := store.Get(request, "session-name")
 
-		// Stockez une valeur dans la session
 		userId := session.Values["user_id"].(int64)
 
 		lastId := Entity.AddHub(queryHub, userId)

@@ -12,23 +12,18 @@ type Hub struct {
 }
 
 func AddHub(item Hub, userId int64) int64 {
-	log.Println("Début du traitement de la requête AddHub")
-
 	db := Middleware.OpenDB()
 
 	result, errdb := db.Exec(
 		"INSERT INTO Hubs (name,user_id) VALUES (?,?)",
 		item.Name, userId,
 	)
-	log.Println("result", result)
 
 	if errdb != nil {
 		log.Fatal(errdb)
 	}
 
 	lastHub, _ := result.LastInsertId()
-
-	log.Println("lastHub", lastHub)
 
 	return lastHub
 }
@@ -46,19 +41,13 @@ func GetHubById(id int64) Hub {
 }
 
 func GetAllHubs() []Hub {
-	log.Println("Début du traitement de la requête GetAllHubs")
-
-	// call at the db
 	db := Middleware.OpenDB()
 
-	// Use the table of the db
 	rows, _ := db.Query("SELECT * FROM Hubs")
 	defer rows.Close()
 
-	// initialize User type
 	hubs := []Hub{}
 
-	// add all the row in users
 	for rows.Next() {
 		hub := Hub{}
 		_ = rows.Scan(&hub.ID, &hub.Name, &hub.UserId)
@@ -69,14 +58,7 @@ func GetAllHubs() []Hub {
 }
 
 func DeleteHubByID(id int64) {
-	// Open db
 	db := Middleware.OpenDB()
-	// call in db
 	db.Exec("DELETE FROM Hubs WHERE id = ?", id)
 
 }
-
-// type HubsInterface interface {
-// 	GetAllHubs() ([]Hub, error)
-// 	AddHub() ([]Hub, error)
-// }

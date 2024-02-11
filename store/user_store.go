@@ -2,12 +2,13 @@ package Store
 
 import (
 	"encoding/json"
-	"github.com/gorilla/sessions"
 	"log"
 	"net/http"
 	"pokomand-go/Entity"
 	"pokomand-go/Middleware"
 	"strings"
+
+	"github.com/gorilla/sessions"
 )
 
 func Login() http.HandlerFunc {
@@ -22,7 +23,6 @@ func Login() http.HandlerFunc {
 			store := sessions.NewCookieStore([]byte("poko"))
 			session, _ := store.Get(request, "session-name")
 
-			// Stockez une valeur dans la session
 			session.Values["user"] = user.ID
 			session.Save(request, writer)
 

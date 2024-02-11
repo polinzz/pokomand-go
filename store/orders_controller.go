@@ -2,12 +2,13 @@ package Store
 
 import (
 	"encoding/json"
-	"github.com/go-chi/chi/v5"
-	"github.com/gorilla/sessions"
 	"log"
 	"net/http"
 	"pokomand-go/Entity"
 	"strconv"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/gorilla/sessions"
 )
 
 func CreateOrder() http.HandlerFunc {
@@ -46,9 +47,7 @@ func FinishOrder() http.HandlerFunc {
 		if err != nil {
 			log.Fatal(err)
 		}
-		// Stockez une valeur dans la session
 		userId := session.Values["user_id"].(int64)
-
 		order := Entity.OrderFinish(int64(id), userId)
 
 		json.NewEncoder(writer).Encode(struct {
@@ -76,7 +75,6 @@ func StatusUpdate() http.HandlerFunc {
 		store := sessions.NewCookieStore([]byte("poko"))
 		session, _ := store.Get(request, "session-name")
 
-		// Stockez une valeur dans la session
 		userId := session.Values["user_id"].(int64)
 
 		if err != nil {

@@ -2,7 +2,6 @@ package Entity
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"math/rand"
 	"pokomand-go/Middleware"
@@ -61,7 +60,6 @@ func GetOrderById(id int64) Order {
 		log.Fatal(err)
 	}
 
-	// Utiliser json.Unmarshal pour déserialiser la chaîne JSON dans le champ Product
 	err = json.Unmarshal([]byte(productJSON), &order.Product)
 	if err != nil {
 		log.Fatal(err)
@@ -106,10 +104,8 @@ func ChangeStatus(queryOrder Order, id int64, userId int64) Order {
 }
 
 func GetAllOrders(id int64) []Order {
-	// call at the db
 	db := Middleware.OpenDB()
 
-	// Use the table of the db
 	rows, err := db.Query("SELECT * FROM Orders WHERE restaurant_id = ?", id)
 	if err != nil {
 		log.Fatal(err)
@@ -117,10 +113,8 @@ func GetAllOrders(id int64) []Order {
 	defer rows.Close()
 
 	var productJSON string
-	// initialize User type
 	orders := []Order{}
 
-	// add all the row in users
 	for rows.Next() {
 		order := Order{}
 		_ = rows.Scan(&order.Id, &productJSON, &order.RestaurantId, &order.Price, &order.Status, &order.IsFinish, &order.RetrieveCode)
@@ -139,7 +133,6 @@ func GetAllOrders(id int64) []Order {
 func GetOrders(id int64, finish bool) []Order {
 	db := Middleware.OpenDB()
 
-	// Use the table of the db
 	rows, err := db.Query("SELECT * FROM Orders WHERE restaurant_id = ? AND is_finish = ?", id, finish)
 	if err != nil {
 		log.Fatal(err)
@@ -147,10 +140,8 @@ func GetOrders(id int64, finish bool) []Order {
 	defer rows.Close()
 
 	var productJSON string
-	// initialize User type
 	orders := []Order{}
 
-	// add all the row in users
 	for rows.Next() {
 		order := Order{}
 		_ = rows.Scan(&order.Id, &productJSON, &order.RestaurantId, &order.Price, &order.Status, &order.IsFinish, &order.RetrieveCode)
@@ -175,9 +166,6 @@ func GetOrderByRetrieveCode(retrieveCode int64) Order {
 		return Order{}
 	}
 
-	// Utiliser json.Unmarshal pour déserialiser la chaîne JSON dans le champ Product
-
-	fmt.Println(order.Id)
 	err = json.Unmarshal([]byte(productJSON), &order.Product)
 	if err != nil {
 		log.Fatal(err)
