@@ -3,15 +3,25 @@ package main
 import (
 	"net/http"
 	"pokomand-go/Entity"
-	"pokomand-go/store"
+	Store "pokomand-go/store"
 
 	"github.com/go-chi/chi/v5"
 
+	"github.com/go-chi/cors"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
 	router := chi.NewRouter()
+
+	cors := cors.New(cors.Options{
+			AllowedOrigins:   []string{"http://localhost:3000"},
+			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+			AllowedHeaders:   []string{"Content-Type", "Authorization"},
+			AllowCredentials: true,
+	})
+
+	router.Use(cors.Handler)
 
 	// ENDPOINTS
 
@@ -24,12 +34,14 @@ func main() {
 	router.Post("/hub/add", Store.CreateHub())
 	router.Get("/hubs", Store.ShowHubs())
 	router.Get("/hub/{id}", Store.ShowOneHub())
-	router.Delete("/hub/{id}", Store.DeleteHub())
+	// router.Delete("/hub/{id}", Store.DeleteHub())
 
 	// Restaurants
 	router.Post("/restaurant/add", Entity.CreateRestaurantHandler)
 	router.Get("/restaurants", Entity.GetAllRestaurants)
+	router.Get("/restaurant", Entity.GetRestaurantByID)
 	router.Delete("/restaurant", Entity.DeleteRestaurantByID)
+
 
 	// Order
 	router.Post("/order/finish/{id}", Store.FinishOrder())
@@ -41,32 +53,3 @@ func main() {
 
 	http.ListenAndServe(":5686", router)
 }
-
-// FAKE DATA FOR RESTAURANTS
-
-// Create http://localhost:5686/restaurant/add
-// {
-//   "name": "Nom du restaurant 1",
-//   "foods": [
-//     {
-//         "name": "food 1",
-//         "price" : "2"
-//     },
-//     {
-//         "name": "food 2",
-//         "price" : "3"
-//     }
-//   ],
-//   "drinks": [
-//     {
-//         "name": "drink 1",
-//         "price" : "2"
-//     },
-//     {
-//         "name": "drink 2",
-//         "price" : "3"
-//     }
-//   ]
-// }
-
-// Delete http://localhost:5686/restaurant?id={id}

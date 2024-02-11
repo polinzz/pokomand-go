@@ -133,3 +133,51 @@ func DeleteRestaurantByID(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "Restaurant with ID %d deleted successfully", restaurantID)
 }
+
+func GetRestaurantByID(w http.ResponseWriter, r *http.Request) {
+	restaurantIDStr := r.URL.Query().Get("id")
+	restaurantID, err := strconv.Atoi(restaurantIDStr)
+	if err != nil {
+		http.Error(w, "Invalid restaurant ID", http.StatusBadRequest)
+		return
+	}
+
+	db := Middleware.OpenDB()
+	defer db.Close()
+
+	var restaurantName, foodsJSON, drinksJSON string
+	err = db.QueryRow("SELECT name, foods, drinks FROM Restaurants WHERE id = ?", restaurantID).Scan(&restaurantName, &foodsJSON, &drinksJSON)
+	if err != nil {
+		http.Error(w, "Restaurant not found", http.StatusNotFound)
+		return
+	}
+
+	restaurantInfo := struct {
+		Name   string  `json:"name"`
+		Foods  []Food  `json:"foods"`
+		Drinks []Drink `json:"drinks"`
+	}{
+		Name:   restaurantName,
+		Foods:  make([]Food, 0),
+		Drinks: make([]Drink, 0),
+	}
+
+	err = json.Unmarshal([]byte(foodsJSON), &restaurantInfo.Foods)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = json.Unmarshal([]byte(drinksJSON), &restaurantInfo.Drinks)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(restaurantInfo)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
