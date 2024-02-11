@@ -2,6 +2,7 @@ package Entity
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"math/rand"
 	"pokomand-go/Middleware"
@@ -41,7 +42,7 @@ func AddOrder(item Order) int64 {
 		products, item.RestaurantId, totalPrice, "En attente", RetrieveCode)
 
 	if errdb != nil {
-		log.Fatal(errdb)
+		log.Fatal(err)
 	}
 
 	lastOrder, _ := result.LastInsertId()
@@ -109,7 +110,10 @@ func GetAllOrders(id int64) []Order {
 	db := Middleware.OpenDB()
 
 	// Use the table of the db
-	rows, _ := db.Query("SELECT * FROM Orders WHERE restaurant_id = ?", id)
+	rows, err := db.Query("SELECT * FROM Orders WHERE restaurant_id = ?", id)
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer rows.Close()
 
 	var productJSON string
@@ -120,6 +124,7 @@ func GetAllOrders(id int64) []Order {
 	for rows.Next() {
 		order := Order{}
 		_ = rows.Scan(&order.Id, &productJSON, &order.RestaurantId, &order.Price, &order.Status, &order.IsFinish, &order.RetrieveCode)
+
 		err := json.Unmarshal([]byte(productJSON), &order.Product)
 		if err != nil {
 			log.Fatal(err)
@@ -135,7 +140,10 @@ func GetOrders(id int64, finish bool) []Order {
 	db := Middleware.OpenDB()
 
 	// Use the table of the db
-	rows, _ := db.Query("SELECT * FROM Orders WHERE restaurant_id = ? AND is_finish = ?", id, finish)
+	rows, err := db.Query("SELECT * FROM Orders WHERE restaurant_id = ? AND is_finish = ?", id, finish)
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer rows.Close()
 
 	var productJSON string
@@ -164,14 +172,17 @@ func GetOrderByRetrieveCode(retrieveCode int64) Order {
 	err := db.QueryRow("SELECT id, product, restaurant_id, price, status, is_finish, retrieve_code FROM Orders WHERE retrieve_code = ?", retrieveCode).Scan(&order.Id, &productJSON, &order.RestaurantId, &order.Price, &order.Status, &order.IsFinish, &order.RetrieveCode)
 
 	if err != nil {
-		log.Fatal(err)
+		return Order{}
 	}
 
 	// Utiliser json.Unmarshal pour déserialiser la chaîne JSON dans le champ Product
+
+	fmt.Println(order.Id)
 	err = json.Unmarshal([]byte(productJSON), &order.Product)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	return order
+
 }
