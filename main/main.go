@@ -15,10 +15,10 @@ func main() {
 	router := chi.NewRouter()
 
 	cors := cors.New(cors.Options{
-			AllowedOrigins:   []string{"http://localhost:3000"},
-			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-			AllowedHeaders:   []string{"Content-Type", "Authorization"},
-			AllowCredentials: true,
+		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
 	})
 
 	router.Use(cors.Handler)
@@ -42,13 +42,12 @@ func main() {
 	router.Get("/restaurant", Entity.GetRestaurantByID)
 	router.Delete("/restaurant", Entity.DeleteRestaurantByID)
 
-
 	// Order
 	router.Post("/order/finish/{id}", Store.FinishOrder())
 	router.Post("/order/status/{id}", Store.StatusUpdate())
 	router.Get("/order/{restaurant_id}", Store.ShowOrders())
 	router.Get("/order/{state}/{restaurant_id}", Store.ShowStateOrders())
-	router.Get("/order/retrieve_code/{state}/{retrieve_code}", Store.ShowOrdersByRetrieveCoce())
+	router.Get("/order/retrieve_code/{retrieve_code}", Store.ShowOrdersByRetrieveCode())
 	router.Post("/order/add", Store.CreateOrder())
 
 	http.ListenAndServe(":5686", router)

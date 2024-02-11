@@ -41,8 +41,11 @@ func FinishOrder() http.HandlerFunc {
 		}
 
 		store := sessions.NewCookieStore([]byte("poko"))
-		session, _ := store.Get(request, "session-name")
+		session, err := store.Get(request, "session-name")
 
+		if err != nil {
+			log.Fatal(err)
+		}
 		// Stockez une valeur dans la session
 		userId := session.Values["user_id"].(int64)
 
@@ -63,8 +66,13 @@ func StatusUpdate() http.HandlerFunc {
 		queryId := chi.URLParam(request, "id")
 		queryStatus := Entity.Order{}
 		err := json.NewDecoder(request.Body).Decode(&queryStatus)
+		if err != nil {
+			log.Fatal(err)
+		}
 		id, err := strconv.Atoi(queryId)
-
+		if err != nil {
+			log.Fatal(err)
+		}
 		store := sessions.NewCookieStore([]byte("poko"))
 		session, _ := store.Get(request, "session-name")
 
@@ -90,7 +98,10 @@ func StatusUpdate() http.HandlerFunc {
 func ShowOrders() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		queryId := chi.URLParam(request, "restaurant_id")
-		id, _ := strconv.Atoi(queryId)
+		id, err := strconv.Atoi(queryId)
+		if err != nil {
+			log.Fatal(err)
+		}
 		orders := Entity.GetAllOrders(int64(id))
 
 		json.NewEncoder(writer).Encode(struct {
@@ -103,10 +114,13 @@ func ShowOrders() http.HandlerFunc {
 	}
 }
 
-func ShowOrdersByRetrieveCoce() http.HandlerFunc {
+func ShowOrdersByRetrieveCode() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		queryId := chi.URLParam(request, "retrieve_code")
-		id, _ := strconv.Atoi(queryId)
+		id, err := strconv.Atoi(queryId)
+		if err != nil {
+			log.Fatal(err)
+		}
 		order := Entity.GetOrderByRetrieveCode(int64(id))
 
 		json.NewEncoder(writer).Encode(struct {
@@ -124,7 +138,10 @@ func ShowStateOrders() http.HandlerFunc {
 		queryId := chi.URLParam(request, "restaurant_id")
 		queryState := chi.URLParam(request, "state")
 
-		id, _ := strconv.Atoi(queryId)
+		id, err := strconv.Atoi(queryId)
+		if err != nil {
+			log.Fatal(err)
+		}
 		var finish bool
 		switch queryState {
 		case "finish":
