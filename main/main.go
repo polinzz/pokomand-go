@@ -15,10 +15,10 @@ func main() {
 	router := chi.NewRouter()
 
 	cors := cors.New(cors.Options{
-			AllowedOrigins:   []string{"http://localhost:3000"},
-			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-			AllowedHeaders:   []string{"Content-Type", "Authorization"},
-			AllowCredentials: true,
+		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
 	})
 
 	router.Use(cors.Handler)
@@ -37,11 +37,10 @@ func main() {
 	// router.Delete("/hub/{id}", Store.DeleteHub())
 
 	// Restaurants
-	router.Post("/restaurant/add", Entity.CreateRestaurantHandler)
-	router.Get("/restaurants", Entity.GetAllRestaurants)
-	router.Get("/restaurant", Entity.GetRestaurantByID)
-	router.Delete("/restaurant", Entity.DeleteRestaurantByID)
-
+	router.Post("/restaurant/add", Store.CreateRestaurant())
+	router.Get("/restaurants/{hub_id}", Store.ShowRestaurants())
+	router.Get("/restaurant/{id}", Store.ShowOneRestaurant())
+	router.Delete("/restaurant/{id}", Store.DeleteRestaurant())
 
 	// Order
 	router.Post("/order/finish/{id}", Store.FinishOrder())

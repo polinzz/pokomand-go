@@ -53,7 +53,8 @@ func GetOrderById(id int64) Order {
 	db := Middleware.OpenDB()
 	order := Order{}
 	var productJSON string
-	err := db.QueryRow("SELECT id, product, restaurant_id, price, status, is_finish, retrieve_code FROM Orders WHERE id = ?", id).Scan(&order.Id, &productJSON, &order.RestaurantId, &order.Price, &order.Status, &order.IsFinish, &order.RetrieveCode)
+	err := db.QueryRow("SELECT id, product, restaurant_id, price, status, is_finish, retrieve_code FROM Orders WHERE id = ?", id).
+		Scan(&order.Id, &productJSON, &order.RestaurantId, &order.Price, &order.Status, &order.IsFinish, &order.RetrieveCode)
 
 	if err != nil {
 		log.Fatal(err)

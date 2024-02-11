@@ -13,31 +13,22 @@ import (
 
 func CreateHub() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
-		log.Println("Début du traitement de la requête CreateHub")
 		queryHub := Entity.Hub{}
-		log.Println("queryHub:", queryHub)
 
 		err := json.NewDecoder(request.Body).Decode(&queryHub)
 		if err != nil {
-			log.Println("Erreur lors du décodage JSON:", err)
 			log.Fatal(err)
 		}
 
 		store := sessions.NewCookieStore([]byte("poko"))
 		session, _ := store.Get(request, "session-name")
-		log.Println("store:", store)
-		log.Println("session:", session)
 
 		// Stockez une valeur dans la session
 		userId := session.Values["user_id"].(int64)
-		log.Println("userId:", userId)
 
 		lastId := Entity.AddHub(queryHub, userId)
-		log.Println("lastId:", lastId)
 
 		hub := Entity.GetHubById(lastId)
-
-		log.Println("hub:", hub)
 
 		json.NewEncoder(writer).Encode(struct {
 			Status  string     `json:"status"`

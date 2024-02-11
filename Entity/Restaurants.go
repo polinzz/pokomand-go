@@ -2,15 +2,14 @@ package Entity
 
 import (
 	"encoding/json"
-	"fmt"
-	"net/http"
+	"log"
 	"pokomand-go/Middleware"
-	"strconv"
 )
 
 type Restaurant struct {
-	ID     int    `json:"id"`
+	ID     int     `json:"id"`
 	Name   string  `json:"name"`
+	HubId  int     `json:"hub_id"`
 	Foods  []Food  `json:"foods"`
 	Drinks []Drink `json:"drinks"`
 }
@@ -25,159 +24,91 @@ type Drink struct {
 	Price string `json:"price"`
 }
 
-func CreateRestaurantHandler(w http.ResponseWriter, r *http.Request) {
-	var restaurant Restaurant
-	err := json.NewDecoder(r.Body).Decode(&restaurant)
-	if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-	}
+func AddRestaurant(item Restaurant) int64 {
+	log.Println("Début du traitement de la requête AddRestaurant")
 
 	db := Middleware.OpenDB()
-	defer db.Close()
 
-	foodsJSON, err := json.Marshal(restaurant.Foods)
+	foods, err := json.Marshal(&item.Foods)
+	drinks, err := json.Marshal(&item.Drinks)
 	if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		log.Fatal(err)
 	}
 
-	drinksJSON, err := json.Marshal(restaurant.Drinks)
-	if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+	result, errdb := db.Exec(
+		"INSERT INTO Restaurants (name, hub_id, foods, drinks) VALUES (?, ?, ?, ?)",
+		item.Name, item.HubId, foods, drinks,
+	)
+	log.Println("result", result)
+
+	if errdb != nil {
+		log.Fatal(errdb)
 	}
 
-	_, err = db.Exec("INSERT INTO Restaurants (name, foods, drinks) VALUES (?, ?, ?)",
-			restaurant.Name, foodsJSON, drinksJSON)
-	if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-	}
+	lastRestaurant, _ := result.LastInsertId()
 
-	fmt.Fprintf(w, "Restaurant créé avec succès")
+	log.Println("lastRestaurant", lastRestaurant)
+
+	return lastRestaurant
 }
 
-func GetAllRestaurants(w http.ResponseWriter, r *http.Request) {
+func GetRestaurantById(id int64) Restaurant {
 	db := Middleware.OpenDB()
-	defer db.Close()
+	restaurant := Restaurant{}
+	var foodsJSON string
+	var drinksJSON string
 
-	rows, err := db.Query("SELECT id, name, foods, drinks FROM Restaurants")
+	err := db.QueryRow("SELECT * FROM Restaurants WHERE id = ?", id).
+		Scan(&restaurant.ID, &restaurant.Name, &restaurant.HubId, &foodsJSON, &drinksJSON)
 	if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		log.Fatal(err)
 	}
+
+	err = json.Unmarshal([]byte(foodsJSON), &restaurant.Foods)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = json.Unmarshal([]byte(drinksJSON), &restaurant.Drinks)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return restaurant
+}
+
+func GetAllRestaurantsByHubId(hubId int64) []Restaurant {
+	db := Middleware.OpenDB()
+	log.Println("hubId", hubId)
+
+	rows, _ := db.Query("SELECT * FROM Restaurants WHERE hub_id = ?", hubId)
 	defer rows.Close()
 
-	var restaurants []Restaurant
+	log.Println("rows", rows)
+
+	var foodsJSON string
+	var drinksJSON string
+	restaurants := []Restaurant{}
+
 	for rows.Next() {
-			var restaurant Restaurant
-			var foodsJSON, drinksJSON string
-			err := rows.Scan(&restaurant.ID, &restaurant.Name, &foodsJSON, &drinksJSON)
-			if err != nil {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
-			}
-
-			err = json.Unmarshal([]byte(foodsJSON), &restaurant.Foods)
-			if err != nil {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
-			}
-
-			err = json.Unmarshal([]byte(drinksJSON), &restaurant.Drinks)
-			if err != nil {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
-			}
-
-			restaurants = append(restaurants, restaurant)
-	}
-	if err := rows.Err(); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		restaurant := Restaurant{}
+		_ = rows.Scan(&restaurant.ID, &restaurant.Name, &restaurant.HubId, &foodsJSON, &drinksJSON)
+		errFoods := json.Unmarshal([]byte(foodsJSON), &restaurant.Foods)
+		errDrinks := json.Unmarshal([]byte(drinksJSON), &restaurant.Drinks)
+		if errFoods != nil {
+			log.Fatal("errFoods ", errFoods)
+		}
+		if errDrinks != nil {
+			log.Fatal("errDrinks ", errDrinks)
+		}
+		restaurants = append(restaurants, restaurant)
+		log.Println("restaurants", restaurants)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(restaurants)
+	return restaurants
 }
 
-func DeleteRestaurantByID(w http.ResponseWriter, r *http.Request) {
-	restaurantIDStr := r.URL.Query().Get("id")
-	restaurantID, err := strconv.Atoi(restaurantIDStr)
-	if err != nil {
-			http.Error(w, "Invalid restaurant ID", http.StatusBadRequest)
-			return
-	}
-
+func DeleteRestaurantByID(id int64) {
 	db := Middleware.OpenDB()
-	defer db.Close()
-
-	result, err := db.Exec("DELETE FROM Restaurants WHERE id = ?", restaurantID)
-	if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-	}
-
-	if rowsAffected == 0 {
-			http.Error(w, fmt.Sprintf("No restaurant found with ID %d", restaurantID), http.StatusNotFound)
-			return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "Restaurant with ID %d deleted successfully", restaurantID)
-}
-
-func GetRestaurantByID(w http.ResponseWriter, r *http.Request) {
-	restaurantIDStr := r.URL.Query().Get("id")
-	restaurantID, err := strconv.Atoi(restaurantIDStr)
-	if err != nil {
-		http.Error(w, "Invalid restaurant ID", http.StatusBadRequest)
-		return
-	}
-
-	db := Middleware.OpenDB()
-	defer db.Close()
-
-	var restaurantName, foodsJSON, drinksJSON string
-	err = db.QueryRow("SELECT name, foods, drinks FROM Restaurants WHERE id = ?", restaurantID).Scan(&restaurantName, &foodsJSON, &drinksJSON)
-	if err != nil {
-		http.Error(w, "Restaurant not found", http.StatusNotFound)
-		return
-	}
-
-	restaurantInfo := struct {
-		Name   string  `json:"name"`
-		Foods  []Food  `json:"foods"`
-		Drinks []Drink `json:"drinks"`
-	}{
-		Name:   restaurantName,
-		Foods:  make([]Food, 0),
-		Drinks: make([]Drink, 0),
-	}
-
-	err = json.Unmarshal([]byte(foodsJSON), &restaurantInfo.Foods)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	err = json.Unmarshal([]byte(drinksJSON), &restaurantInfo.Drinks)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(restaurantInfo)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	db.Exec("DELETE FROM Restaurants WHERE id = ?", id)
 }
