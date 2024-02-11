@@ -37,10 +37,10 @@ func main() {
 	router.Delete("/hub/delete/{id}", Store.DeleteHub())
 
 	// Restaurants
-	router.Post("/restaurant/add", Entity.CreateRestaurantHandler)
-	router.Get("/restaurants", Entity.GetAllRestaurants)
-	router.Get("/restaurant", Entity.GetRestaurantByID)
-	router.Delete("/restaurant", Entity.DeleteRestaurantByID)
+	router.Post("/restaurant/add", Store.CreateRestaurant())
+	router.Get("/restaurants/{hub_id}", Store.ShowRestaurants())
+	router.Get("/restaurant/{id}", Store.ShowOneRestaurant())
+	router.Delete("/restaurant/{id}", Store.DeleteRestaurant())
 
 	// Order
 	router.Post("/order/finish/{id}", Store.FinishOrder())

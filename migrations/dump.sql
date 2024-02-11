@@ -1,6 +1,7 @@
 CREATE TABLE `Restaurants`(
                               `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
                               `name` TEXT NOT NULL,
+                              `hub_id` INT UNSIGNED NOT NULL,
                               `foods` JSON NOT NULL,
                               `drinks` JSON NOT NULL
 );
@@ -35,15 +36,9 @@ CREATE TABLE `User_Hubs`(
                             `user_id` INT UNSIGNED NOT NULL,
                             `hub_id` INT UNSIGNED NOT NULL
 );
-CREATE TABLE `Hub_Restaurants`(
-                                  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-                                  `restaurant_id` INT UNSIGNED NOT NULL,
-                                  `hub_id` INT UNSIGNED NOT NULL
-);
 CREATE TABLE `Hubs`(
                        `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
                        `name` TEXT NOT NULL,
-                       `restaurant_id` INT NOT NULL,
                        `user_id` INT NOT NULL
 );
 ALTER TABLE
@@ -55,8 +50,6 @@ ALTER TABLE
 ALTER TABLE
     `User_Hubs` ADD CONSTRAINT `user_hubs_hub_id_foreign` FOREIGN KEY(`hub_id`) REFERENCES `Hubs`(`id`);
 ALTER TABLE
-    `Hub_Restaurants` ADD CONSTRAINT `hub_restaurants_restaurant_id_foreign` FOREIGN KEY(`restaurant_id`) REFERENCES `Restaurants`(`id`);
+    `Restaurants` ADD CONSTRAINT `restaurants_hub_id_foreign` FOREIGN KEY(`hub_id`) REFERENCES `Hubs`(`id`);
 ALTER TABLE
     `User_Hubs` ADD CONSTRAINT `user_hubs_user_id_foreign` FOREIGN KEY(`user_id`) REFERENCES `Users`(`id`);
-ALTER TABLE
-    `Hub_Restaurants` ADD CONSTRAINT `hub_restaurants_hub_id_foreign` FOREIGN KEY(`hub_id`) REFERENCES `Hubs`(`id`);

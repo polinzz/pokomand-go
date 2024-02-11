@@ -6,10 +6,9 @@ import (
 )
 
 type Hub struct {
-	ID           int    `json:"id"`
-	Name         string `json:"name"`
-	RestaurantId int    `json:"restaurant_id"`
-	UserId       int    `json:"user_id"`
+	ID     int    `json:"id"`
+	Name   string `json:"name"`
+	UserId int    `json:"user_id"`
 }
 
 func AddHub(item Hub, userId int64) int64 {
@@ -18,8 +17,8 @@ func AddHub(item Hub, userId int64) int64 {
 	db := Middleware.OpenDB()
 
 	result, errdb := db.Exec(
-		"INSERT INTO Hubs (name,restaurant_id,user_id) VALUES (?,?,?)",
-		item.Name, item.RestaurantId, userId,
+		"INSERT INTO Hubs (name,user_id) VALUES (?,?)",
+		item.Name, userId,
 	)
 	log.Println("result", result)
 
@@ -39,7 +38,7 @@ func GetHubById(id int64) Hub {
 	db := Middleware.OpenDB()
 	hub := Hub{}
 	// call in db
-	err := db.QueryRow("SELECT * FROM Hubs WHERE id = ?", id).Scan(&hub.ID, &hub.Name, &hub.RestaurantId, &hub.UserId)
+	err := db.QueryRow("SELECT * FROM Hubs WHERE id = ?", id).Scan(&hub.ID, &hub.Name, &hub.UserId)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -62,7 +61,7 @@ func GetAllHubs() []Hub {
 	// add all the row in users
 	for rows.Next() {
 		hub := Hub{}
-		_ = rows.Scan(&hub.ID, &hub.Name, &hub.RestaurantId, &hub.UserId)
+		_ = rows.Scan(&hub.ID, &hub.Name, &hub.UserId)
 		hubs = append(hubs, hub)
 	}
 
