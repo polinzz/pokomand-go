@@ -34,7 +34,7 @@ func main() {
 	router.Post("/hub/add", Store.CreateHub())
 	router.Get("/hubs", Store.ShowHubs())
 	router.Get("/hub/{id}", Store.ShowOneHub())
-	// router.Delete("/hub/{id}", Store.DeleteHub())
+	router.Delete("/hub/delete/{id}", Store.DeleteHub())
 
 	// Restaurants
 	router.Post("/restaurant/add", Entity.CreateRestaurantHandler)

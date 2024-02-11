@@ -69,16 +69,12 @@ func GetAllHubs() []Hub {
 	return hubs
 }
 
-func DeleteHubByID(id int64) Hub {
+func DeleteHubByID(id int64) {
 	// Open db
 	db := Middleware.OpenDB()
-	hub := Hub{}
 	// call in db
-	err := db.QueryRow("DELETE FROM Hubs WHERE id = ?", id)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return hub
+	db.Exec("DELETE FROM Hubs WHERE id = ?", id)
+
 }
 
 // type HubsInterface interface {

@@ -79,18 +79,18 @@ func ShowOneHub() http.HandlerFunc {
 	}
 }
 
-// func DeleteHub() http.HandlerFunc {
-// 	return func(writer http.ResponseWriter, request *http.Request) {
-// 		queryId := chi.URLParam(request, "id")
-// 		id, _ := strconv.Atoi(queryId)
-// 		hub := Entity.DeleteHubByID(int64(id))
+func DeleteHub() http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		queryId := chi.URLParam(request, "id")
+		id, _ := strconv.Atoi(queryId)
+		Entity.DeleteHubByID(int64(id))
 
-// 		json.NewEncoder(writer).Encode(struct {
-// 			Status  string `json:"status"`
-// 			Message string `json:"message"`
-// 		}{
-// 			Status:  "success",
-// 			Message: "Hub supprimé",
-// 		})
-// 	}
-// }
+		json.NewEncoder(writer).Encode(struct {
+			Status  string `json:"status"`
+			Message string `json:"message"`
+		}{
+			Status:  "success",
+			Message: "Hub supprimé",
+		})
+	}
+}
